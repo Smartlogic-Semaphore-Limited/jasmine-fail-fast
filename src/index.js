@@ -2,6 +2,27 @@ import _ from 'lodash';
 
 let refs;
 
+// Use a custom matcher to tell fail-fast to actually fail fast.
+// If another matcher is used, further tests will be executed anyway as normal.
+var FAIL_FAST_NAME = 'toFailFast';
+
+function toFailFast(/*util, customEqualityTesters*/) {
+  return {
+    compare: function (actual, message) {
+      return {
+        pass: false,
+        message: 'Fail fast: ' + message
+      };
+    }
+  };
+}
+
+export var customMatchers = (() => {
+  var customMatchers = {};
+  customMatchers[FAIL_FAST_NAME] = toFailFast;
+  return customMatchers;
+})();
+
 // Jasmine doesn't yet have an option to fail fast. This "reporter" is a workaround for the time
 // being, making Jasmine essentially skip all tests after the first failure.
 // https://github.com/jasmine/jasmine/issues/414
@@ -12,7 +33,12 @@ export function init() {
   return {
     specDone(result) {
       if (result.status === 'failed') {
-        disableSpecs(refs);
+        var failedFast = result.failedExpectations.some(
+          (expectation) => expectation.matcherName === FAIL_FAST_NAME);
+        if (failedFast) {
+          console.log("FAILING FAST!");
+          disableSpecs(refs);
+        }
       }
     }
   };
