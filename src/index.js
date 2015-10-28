@@ -36,7 +36,7 @@ export function getSpecReferences() {
   // Wrap jasmine's describe function to gather references to all suites.
   jasmine.getEnv().describe = _.wrap(jasmine.getEnv().describe,
     (describe, ...args) => {
-      let suite = describe.apply(null, args);
+      let suite = describe.apply(jasmine.getEnv(), args);
       suites.push(suite);
       return suite;
     });
