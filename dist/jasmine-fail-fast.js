@@ -1,14 +1,27 @@
-import _ from 'lodash';
+'use strict';
 
-let refs;
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports.init = init;
+exports.getSpecReferences = getSpecReferences;
+exports.disableSpecs = disableSpecs;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var refs = undefined;
 
 // Use a custom matcher to tell fail-fast to actually fail fast.
 // If another matcher is used, further tests will be executed anyway as normal.
 var FAIL_FAST_NAME = 'toFailFast';
 
-function toFailFast(/*util, customEqualityTesters*/) {
+function toFailFast() /*util, customEqualityTesters*/{
   return {
-    compare: function (actual, message) {
+    compare: function compare(actual, message) {
       return {
         pass: false,
         message: 'Fail fast: ' + message
@@ -17,24 +30,27 @@ function toFailFast(/*util, customEqualityTesters*/) {
   };
 }
 
-export var customMatchers = (() => {
+var customMatchers = (function () {
   var customMatchers = {};
   customMatchers[FAIL_FAST_NAME] = toFailFast;
   return customMatchers;
 })();
 
+exports.customMatchers = customMatchers;
 // Jasmine doesn't yet have an option to fail fast. This "reporter" is a workaround for the time
 // being, making Jasmine essentially skip all tests after the first failure.
 // https://github.com/jasmine/jasmine/issues/414
 // https://github.com/juliemr/minijasminenode/issues/20
-export function init() {
+
+function init() {
   refs = getSpecReferences();
 
   return {
-    specDone(result) {
+    specDone: function specDone(result) {
       if (result.status === 'failed') {
-        var failedFast = result.failedExpectations.some(
-          (expectation) => expectation.matcherName === FAIL_FAST_NAME);
+        var failedFast = result.failedExpectations.some(function (expectation) {
+          return expectation.matcherName === FAIL_FAST_NAME;
+        });
         if (failedFast) {
           console.log("FAILING FAST!");
           disableSpecs(refs);
@@ -49,27 +65,31 @@ export function init() {
  *
  * @return {Object} An object with `specs` and `suites` properties, arrays of respective types.
  */
-export function getSpecReferences() {
-  let specs = [];
-  let suites = [];
+
+function getSpecReferences() {
+  var specs = [];
+  var suites = [];
 
   // Use specFilter to gather references to all specs.
-  jasmine.getEnv().specFilter = spec => {
+  jasmine.getEnv().specFilter = function (spec) {
     specs.push(spec);
     return true;
   };
 
   // Wrap jasmine's describe function to gather references to all suites.
-  jasmine.getEnv().describe = _.wrap(jasmine.getEnv().describe,
-    (describe, ...args) => {
-      let suite = describe.apply(jasmine.getEnv(), args);
-      suites.push(suite);
-      return suite;
-    });
+  jasmine.getEnv().describe = _lodash2['default'].wrap(jasmine.getEnv().describe, function (describe) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    var suite = describe.apply(jasmine.getEnv(), args);
+    suites.push(suite);
+    return suite;
+  });
 
   return {
-    specs,
-    suites
+    specs: specs,
+    suites: suites
   };
 }
 
@@ -78,14 +98,17 @@ export function getSpecReferences() {
  * remove references to all before/after functions, else they'll still run. Disabling the
  * suites themselves does not appear to have an effect.
  */
-export function disableSpecs() {
+
+function disableSpecs() {
   if (!refs) {
     throw new Error('jasmine-fail-fast: Must call init() before calling disableSpecs()!');
   }
 
-  refs.specs.forEach(spec => spec.disable());
+  refs.specs.forEach(function (spec) {
+    return spec.disable();
+  });
 
-  refs.suites.forEach(suite => {
+  refs.suites.forEach(function (suite) {
     suite.beforeFns = [];
     suite.afterFns = [];
     suite.beforeAllFns = [];
