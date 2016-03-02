@@ -1,10 +1,10 @@
 {
   "name": "jasmine-fail-fast",
   "version": "2.0.0",
-  "description": "Allow Jasmine tests to \"fail-fast\", exiting on the first failure instead of running all tests no matter what. ",
+  "description": "Allow Jasmine tests to \"fail-fast\", exiting on the first failure instead of running all tests no matter what. Patched version",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Updater/jasmine-fail-fast.git"
+    "url": "git://github.com/Smartlogic-Semaphore-Limited/jasmine-fail-fast.git"
   },
   "main": "dist/jasmine-fail-fast.js",
   "scripts": {
